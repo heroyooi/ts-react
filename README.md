@@ -232,6 +232,61 @@ const Try: FC<TryProps> = ({ tryInfo }) => {
 };
 ```
 
+## 2.3 setTimeout useRef 타이핑
+
+```tsx
+const ResponseCheck = () => {
+  const timeout = useRef<number>(null);
+
+  const onClickScreen = () => {
+    timeout.current = setTimeout(() => {});
+  };
+};
+```
+
+- 오버로딩으로 인하여 타입추론이 되는 형태가 정해지는데, 타입 정의를 보고 짝을 맞춰서 맞는 오버로딩이 선택되게끔 해야한다.
+- 위 useRef의 제네릭이 number인 상황에서는 리턴 타입이 RefObject가 된다. 그래서 아래와 같이 수정해서 오버로딩을 바꿔준다.
+
+```tsx
+const ResponseCheck = () => {
+  const timeout = useRef<number | null>(null);
+  const onClickScreen = () => {
+    timeout.current = window.setTimeout(() => {});
+  };
+};
+```
+
+- 위와 같이 작성하므로 useRef의 리턴 타입을 MutableRefObject로 바꿔준다.
+- 그리고 setTimeout은 return 타입을 NodeJS.Timeout으로 인지하므로 위와 같이 window.setTimeout으로 바꿔서 number가 리턴될 수 있도록 바꿔준다.
+
+## 3.1 useCallback과 keyof typeof
+
+```tsx
+const rspCoords = {
+  바위: "0",
+  가위: "-142px",
+  보: "-284px",
+} as const;
+
+type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
+
+const computerChoice = (imgCoords: ImgCoords) => {
+  return (Object.keys(rspCoords) as ["바위", "가위", "보"]).find((k) => {
+    return rspCoords[k] === imgCoords;
+  })!;
+};
+
+const RSP = () => {
+  const onClickBtn = (choice: keyof typeof rspCoords) => () => {};
+};
+```
+
+- 상수 값을 고정해서 사용할 때, as const 를 붙여준다.
+- keyof typeof rspCoords 는 "바위" | "가위" | "보" 가 되고,
+  typeof rspCoords[keyof typeof rspCoords] 는 "0" | "-142px" | "-284px" 가 된다.
+- 남이 만든 타입인 Object.keys는 string[]를 리턴하기 때문에, 위와 같이 강제로 형변환을 해준다.
+- onClickBtn의 매개변수 choice는 "바위" | "가위" | "보"이므로 keyof typeof rspCoords 가 된다.
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -239,4 +294,4 @@ const Try: FC<TryProps> = ({ tryInfo }) => {
 
 ## 듣던 강좌
 
-2-3
+3-3
