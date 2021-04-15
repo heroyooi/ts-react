@@ -11,8 +11,8 @@
       "ES2020",
       "DOM"
     ],
-    "jsx": "react",
-    "esModuleInterop": true
+    "jsx": "react"
+    // "esModuleInterop": true
   },
   "exclude": ["node_modules"]
 }

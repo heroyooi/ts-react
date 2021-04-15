@@ -1,7 +1,14 @@
 import * as React from "react";
 import { Component } from "react";
 
-class GuGuDan extends Component {
+interface State {
+  first: number;
+  second: number;
+  value: string;
+  result: string;
+}
+
+class GuGuDan extends Component<{}, State> {
   state = {
     first: Math.ceil(Math.random() * 9),
     second: Math.ceil(Math.random() * 9),
@@ -9,7 +16,7 @@ class GuGuDan extends Component {
     result: "",
   };
 
-  onSubmit = (e) => {
+  onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (parseInt(this.state.value) === this.state.first * this.state.second) {
       this.setState((prevState) => {
@@ -20,23 +27,27 @@ class GuGuDan extends Component {
           value: "",
         };
       });
-      this.input.focus();
+      if (this.input) {
+        this.input.focus();
+      }
     } else {
       this.setState({
         result: "땡",
         value: "",
       });
-      this.input.focus();
+      if (this.input) {
+        this.input.focus();
+      }
     }
   };
 
-  onChange = (e) => {
+  onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ value: e.target.value });
   };
 
-  input;
+  input: HTMLInputElement | null = null;
 
-  onRefInput = (c) => {
+  onRefInput = (c: HTMLInputElement) => {
     this.input = c;
   };
 

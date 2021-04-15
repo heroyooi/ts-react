@@ -19,9 +19,9 @@ npm i awesome-typescript-loader -D
 
 ### TS를 도입하는 유형
 
-- TS로 만들어진 NPM, 알아서 TS를 지원함. 예) redux
-- TS로 만들어지지는 않았지만, index.d.ts 파일을 제공해서 따로 타입 정의를 하지 않아도 된다. 예) axios
-- 워낙 유명한 라이브러리라서 커뮤니티가 타입들을 만들어 놓았다. 예) react, react-dom
+- 1. TS로 만들어진 NPM, 알아서 TS를 지원함. 예) redux (TS)
+- 2. TS로 만들어지지는 않았지만, index.d.ts 파일을 제공해서 따로 타입 정의를 하지 않아도 된다. 예) axios (TS)
+- 3. 워낙 유명한 라이브러리라서 커뮤니티가 타입들을 만들어 놓았다. 예) react, react-dom (DT)
 
 ```command
 npm i @types/react @types/react-dom -D
@@ -42,8 +42,8 @@ npx webpack
     "lib": [
       "ES5",
       "ES2015",
-      "ES2016",
-      "ES2017",
+      "ES2016", // [].includes
+      "ES2017", // async, await
       "ES2018",
       "ES2019",
       "ES2020",
@@ -115,8 +115,128 @@ const GuGuDan = () => {
 };
 ```
 
-<hr />
+- ※ 타입 추론이 제대로 안되는 경우 제네릭을 사용하여 타입 추론을 시켜준다.
+
+## 추가 세팅
+
+```command
+npm rm awesome-typescript-loader
+npm i webpack-dev-server @types/webpack @types/webpack-dev-server -D
+npm i react-refresh @pmmmwh/react-refresh-webpack-plugin fork-ts-checker-webpack-plugin -D
+npm i @babel/core babel-loader ts-loader ts-node -D
+```
+
+- webpack.config.ts 새로 작성
+
+```ts
+import path from "path";
+import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+
+const config = {
+  name: "typescript-react-dev",
+  mode: "development", // production
+  devtool: "eval", // hidden-source-map
+  resolve: {
+    extensions: [".jsx", ".js", ".tsx", ".ts"],
+  },
+  entry: {
+    app: "./client",
+  },
+  module: {
+    // 바벨 대신 TS 설정
+    rules: [
+      {
+        loader: "babel-loader",
+        options: { plugins: ["react-refresh/babel"] },
+      },
+      {
+        test: /\.tsx?$/, // ts, tsx 파일들
+        loader: "ts-loader",
+        exclude: path.join(__dirname, "node_modules"),
+      },
+    ],
+  },
+  plugins: [new ReactRefreshPlugin(), new ForkTsCheckerWebpackPlugin()],
+  output: {
+    path: path.join(__dirname, "dist"),
+    filename: "[name].js",
+    publicPath: "/dist/",
+  },
+  devServer: {
+    publicPath: "/dist/",
+    hot: true,
+  },
+};
+
+export default config;
+```
+
+## 1-5. useCallback 타이핑
+
+```tsx
+const WordRelay = () => {
+  const onChange = useCallback<
+    (e: React.ChangeEvent<HTMLInputElement>) => void
+  >((e) => {
+    setValue(e.currentTarget.value);
+  }, []);
+};
+```
+
+- useCallback에도 제네릭 자리가 마련되어 있어서 타입추론이 가능해진다.
+- 가독성이 문제라고 판단되면 아래와 같이 작성도 가능하다.
+
+```tsx
+const WordRelay = () => {
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.currentTarget.value);
+  }, []);
+};
+```
+
+## 2-1. 숫자야구 타이핑
+
+- useState에서 빈 배열은 항상 타이핑 문제를 일으킨다. 그래서 제네릭에 타입을 지정해준다.
+
+```tsx
+interface TryInfo {
+  try: string;
+  result: string;
+}
+
+const NumberBaseball = () => {
+  const [tries, setTries] = useState<TryInfo[]>([]);
+};
+```
+
+## 2.2 Props 타이핑
+
+```tsx
+import React, { FC } from "react";
+
+interface TryProps {
+  tryInfo: {
+    try: string;
+    result: string;
+  };
+}
+
+const Try: FC<TryProps> = ({ tryInfo }) => {
+  return (
+    <li>
+      <div>{tryInfo.try}</div>
+      <div>{tryInfo.result}</div>
+    </li>
+  );
+};
+```
 
 ## 참고
 
-- [awesome-typescript-loader](https://github.com/s-panferov/awesome-typescript-loader)
+- [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [TS 공식문서 | What's New](https://www.typescriptlang.org/docs/handbook/release-notes/overview.html)
+
+## 듣던 강좌
+
+2-3
