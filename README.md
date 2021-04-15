@@ -35,7 +35,7 @@ npx webpack
 
 - 타입스크립트 설정 tsconfig.json
 
-```json
+```js
 {
   "compilerOptions": {
     "strict": true,
