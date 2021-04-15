@@ -287,6 +287,23 @@ const RSP = () => {
 - 남이 만든 타입인 Object.keys는 string[]를 리턴하기 때문에, 위와 같이 강제로 형변환을 해준다.
 - onClickBtn의 매개변수 choice는 "바위" | "가위" | "보"이므로 keyof typeof rspCoords 가 된다.
 
+## 3.3 로또 추첨기와 FC useMemo
+
+```tsx
+import React, { VFC } from "react";
+
+interface Props {
+  number: number;
+  onClick?: () => void;
+}
+
+const Ball: VFC<Props> = ({ number, onClick }) => {};
+```
+
+- props를 전달 받는 함수형 컴포넌트는 FC로 타입을 선언하는데, children이 없는 경우 VFC를 사용한다.
+- 물론 FC로 해도 문제는 없다.
+- props를 정의할 때 있어도 되고, 없어도 되는 경우 ?를 붙여준다.
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -294,4 +311,4 @@ const RSP = () => {
 
 ## 듣던 강좌
 
-3-4
+4-1
