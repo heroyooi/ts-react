@@ -373,6 +373,24 @@ const Table: FC<Props> = ({ tableData, dispatch }) => {};
 
 - Dispatch 제네릭 자리에 any 대신 액션들을 넣어도 된다.
 
+## 5-2. Context API 타이핑
+
+- Context를 만들 때 createContext에서 제네릭을 이용하여 타입을 정의해준다.
+
+```tsx
+interface Context {
+  tableData: number[][];
+  halted: boolean;
+  dispatch: Dispatch<ReducerActions>;
+}
+
+export const TableContext = createContext<Context>({
+  tableData: [],
+  halted: true,
+  dispatch: () => {},
+});
+```
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -380,4 +398,4 @@ const Table: FC<Props> = ({ tableData, dispatch }) => {};
 
 ## 듣던 강좌
 
-5-1 | 10:25 | 지뢰찾기 액션 리듀서 작성중...
+5-3 useContext 타이핑
