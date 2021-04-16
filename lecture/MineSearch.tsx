@@ -1,174 +1,190 @@
-import React, { useReducer, useCallback, useEffect } from "react";
-import Table from "./Table";
+import React from "react";
 
+export const CODE = {
+  MINE: -7,
+  NORMAL: -1,
+  QUESTION: -2,
+  FLAG: -3,
+  QUESTION_MINE: -4,
+  FLAG_MINE: -5,
+  CLICKED_MINE: -6,
+  OPENED: 0, // 0 이상이면 다 opened
+} as const;
 interface ReducerState {
-  winner: "O" | "X" | "";
-  turn: "O" | "X";
-  tableData: string[][];
-  recentCell: [number, number];
+  tableData: number[][];
+  data: {
+    row: number;
+    cell: number;
+    mine: number;
+  };
+  timer: number;
+  result: string;
+  halted: boolean;
+  openedCount: number;
 }
 
 const initialState: ReducerState = {
-  winner: "",
-  turn: "O",
-  tableData: [
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""],
-  ],
-  recentCell: [-1, -1],
+  tableData: [],
+  data: {
+    row: 0,
+    cell: 0,
+    mine: 0,
+  },
+  timer: 0,
+  result: "",
+  halted: true,
+  openedCount: 0,
 };
 
-export const SET_WINNER = "SET_WINNER" as const;
-export const CLICK_CELL = "CLICK_CELL" as const;
-export const CHANGE_TURN = "CHANGE_TURN" as const;
-export const RESET_GAME = "RESET_GAME" as const;
+const plantMine = (row: number, cell: number, mine: number) => {
+  const candidate = Array(row * cell)
+    .fill(null)
+    .map((arr, i) => {
+      return i;
+    });
+  const shuffle = [];
+  while (candidate.length > row * cell - mine) {
+    const chosen = candidate.splice(
+      Math.floor(Math.random() * candidate.length),
+      1
+    )[0];
+    shuffle.push(chosen);
+  }
+  const data = [];
+  for (let i = 0; i < row; i++) {
+    const rowData: number[] = [];
+    data.push(rowData);
+    for (let j = 0; j < cell; j++) {
+      rowData.push(CODE.NORMAL);
+    }
+  }
 
-interface SetWinnerAction {
-  type: typeof SET_WINNER;
-  winner: "O" | "X" | "";
+  for (let k = 0; k < shuffle.length; k++) {
+    const ver = Math.floor(shuffle[k] / cell);
+    const hor = shuffle[k] % cell;
+    data[ver][hor] = CODE.MINE;
+  }
+
+  console.log(data);
+  return data;
+};
+
+export const START_GAME = "START_GAME" as const;
+export const OPEN_CELL = "OPEN_CELL" as const;
+export const CLICK_MINE = "CLICK_MINE" as const;
+export const FLAG_CELL = "FLAG_CELL" as const;
+export const QUESTION_CELL = "QUESTION_CELL" as const;
+export const NORMALIZE_CELL = "NORMALIZE_CELL" as const;
+export const INCREMENT_TIMER = "INCREMENT_TIMER" as const;
+
+interface StartGameAction {
+  type: typeof START_GAME;
+  row: number;
+  cell: number;
+  mine: number;
 }
 
-export const setWinner = (winner: "O" | "X" | ""): SetWinnerAction => {
-  return { type: SET_WINNER, winner };
+export const startGame = (
+  row: number,
+  cell: number,
+  mine: number
+): StartGameAction => {
+  return {
+    type: START_GAME,
+    row,
+    cell,
+    mine,
+  };
 };
 
-interface ClickCellAction {
-  type: typeof CLICK_CELL;
+interface OpenCellAction {
+  type: typeof OPEN_CELL;
   row: number;
   cell: number;
 }
 
-export const clickCell = (row: number, cell: number): ClickCellAction => {
-  return { type: CLICK_CELL, row, cell };
+export const openCell = (row: number, cell: number): OpenCellAction => {
+  return {
+    type: OPEN_CELL,
+    row,
+    cell,
+  };
 };
 
-interface ChangeTurnAction {
-  type: typeof CHANGE_TURN;
+interface ClickMineAction {
+  type: typeof CLICK_MINE;
+  row: number;
+  cell: number;
 }
 
-interface ResetGameAction {
-  type: typeof RESET_GAME;
+export const clickMine = (row: number, cell: number): ClickMineAction => {
+  return {
+    type: CLICK_MINE,
+    row,
+    cell,
+  };
+};
+
+interface FlagMineAction {
+  type: typeof FLAG_CELL;
+  row: number;
+  cell: number;
 }
 
-type ReducerActions =
-  | SetWinnerAction
-  | ClickCellAction
-  | ChangeTurnAction
-  | ResetGameAction;
-
-const reducer = (state: ReducerState, action: ReducerActions): ReducerState => {
-  switch (action.type) {
-    case SET_WINNER:
-      // state.winner = action.winner; 이렇게 하면 안됨.
-      return {
-        ...state,
-        winner: action.winner,
-      };
-    case CLICK_CELL: {
-      const tableData = [...state.tableData];
-      tableData[action.row] = [...tableData[action.row]];
-      tableData[action.row][action.cell] = state.turn;
-      return {
-        ...state,
-        tableData,
-        recentCell: [action.row, action.cell],
-      };
-    }
-    case CHANGE_TURN: {
-      return {
-        ...state,
-        turn: state.turn === "O" ? "X" : "O",
-      };
-    }
-    case RESET_GAME: {
-      return {
-        ...state,
-        turn: "O",
-        tableData: [
-          ["", "", ""],
-          ["", "", ""],
-          ["", "", ""],
-        ],
-        recentCell: [-1, -1],
-      };
-    }
-    default:
-      return state;
-  }
+export const flagMine = (row: number, cell: number): FlagMineAction => {
+  return {
+    type: FLAG_CELL,
+    row,
+    cell,
+  };
 };
 
-const TicTacToe = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { tableData, turn, winner, recentCell } = state;
+interface QuestionCellAction {
+  type: typeof QUESTION_CELL;
+  row: number;
+  cell: number;
+}
 
-  const onClickTable = useCallback(() => {
-    dispatch(setWinner("O"));
-  }, []);
-
-  useEffect(() => {
-    const [row, cell] = recentCell;
-    if (row < 0) {
-      return;
-    }
-    let win = false;
-    if (
-      tableData[row][0] === turn &&
-      tableData[row][1] === turn &&
-      tableData[row][2] === turn
-    ) {
-      win = true;
-    }
-    if (
-      tableData[0][cell] === turn &&
-      tableData[1][cell] === turn &&
-      tableData[2][cell] === turn
-    ) {
-      win = true;
-    }
-    if (
-      tableData[0][0] === turn &&
-      tableData[1][1] === turn &&
-      tableData[2][2] === turn
-    ) {
-      win = true;
-    }
-    if (
-      tableData[0][2] === turn &&
-      tableData[1][1] === turn &&
-      tableData[2][0] === turn
-    ) {
-      win = true;
-    }
-    if (win) {
-      // 승리시
-      dispatch(setWinner(turn));
-      dispatch({ type: RESET_GAME });
-    } else {
-      let all = true; // all이 true면 무승부라는 뜻
-      tableData.forEach((row) => {
-        // 무승부 검사
-        row.forEach((cell) => {
-          if (!cell) {
-            all = false;
-          }
-        });
-      });
-      if (all) {
-        dispatch({ type: RESET_GAME });
-        dispatch(setWinner(""));
-      } else {
-        dispatch({ type: CHANGE_TURN });
-      }
-    }
-  }, [recentCell]);
-
-  return (
-    <>
-      <Table onClick={onClickTable} tableData={tableData} dispatch={dispatch} />
-      {winner && <div>{winner}님의 승리</div>}
-    </>
-  );
+export const questionCell = (row: number, cell: number): QuestionCellAction => {
+  return {
+    type: QUESTION_CELL,
+    row,
+    cell,
+  };
 };
 
-export default TicTacToe;
+interface NormalizeCellAction {
+  type: typeof NORMALIZE_CELL;
+  row: number;
+  cell: number;
+}
+
+export const normalizeCell = (
+  row: number,
+  cell: number
+): NormalizeCellAction => {
+  return {
+    type: NORMALIZE_CELL,
+    row,
+    cell,
+  };
+};
+
+interface IncrementTimerAction {
+  type: typeof INCREMENT_TIMER;
+}
+
+export const incrementTimer = (): IncrementTimerAction => {
+  return {
+    type: INCREMENT_TIMER,
+  };
+};
+
+export type ReducerActions =
+  | StartGameAction
+  | OpenCellAction
+  | ClickMineAction
+  | FlagMineAction
+  | QuestionCellAction
+  | NormalizeCellAction
+  | IncrementTimerAction;
