@@ -363,7 +363,7 @@ const reducer = (
 
 ```tsx
 interface Props {
-  tableData: string[][];
+  tableData: string[][]; // 2차원 배열
   dispatch: Dispatch<any>;
   onClick: () => void;
 }
@@ -373,6 +373,23 @@ const Table: FC<Props> = ({ tableData, dispatch }) => {};
 
 - Dispatch 제네릭 자리에 any 대신 액션들을 넣어도 된다.
 
+## 4.5 기타
+
+- 배열 선언할 때 표기법
+
+```tsx
+Array<string | number> // 1
+(string | number)[] // 2
+```
+
+- 1과 2가 동일
+
+<hr />
+
+- @types 패키지들끼리 충돌이 나는 경우가 있다.
+  - 예) 스타일드 컴포넌트를 사용하면 리액트랑 충돌이 난다.
+  - 충돌나는 경우는 우선순위 잡기가 힘들다.
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -380,4 +397,4 @@ const Table: FC<Props> = ({ tableData, dispatch }) => {};
 
 ## 듣던 강좌
 
-4-4
+5-1

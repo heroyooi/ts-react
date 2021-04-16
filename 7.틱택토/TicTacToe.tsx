@@ -26,10 +26,10 @@ export const RESET_GAME = "RESET_GAME" as const;
 
 interface SetWinnerAction {
   type: typeof SET_WINNER;
-  winner: "O" | "X";
+  winner: "O" | "X" | "";
 }
 
-export const setWinner = (winner: "O" | "X"): SetWinnerAction => {
+export const setWinner = (winner: "O" | "X" | ""): SetWinnerAction => {
   return { type: SET_WINNER, winner };
 };
 
@@ -142,7 +142,7 @@ const TicTacToe = () => {
     }
     if (win) {
       // 승리시
-      dispatch({ type: SET_WINNER, winner: turn });
+      dispatch(setWinner(turn));
       dispatch({ type: RESET_GAME });
     } else {
       let all = true; // all이 true면 무승부라는 뜻
@@ -156,6 +156,7 @@ const TicTacToe = () => {
       });
       if (all) {
         dispatch({ type: RESET_GAME });
+        dispatch(setWinner(""));
       } else {
         dispatch({ type: CHANGE_TURN });
       }
