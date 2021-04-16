@@ -304,6 +304,75 @@ const Ball: VFC<Props> = ({ number, onClick }) => {};
 - 물론 FC로 해도 문제는 없다.
 - props를 정의할 때 있어도 되고, 없어도 되는 경우 ?를 붙여준다.
 
+## 4.1 useReducer 타이핑
+
+- initialState 타이핑을 한다.
+
+```tsx
+interface ReducerState {
+  winner: "O" | "X" | "";
+  turn: "O" | "X";
+  tableData: string[][];
+  recentCell: [number, number];
+}
+
+const initialState: ReducerState = {
+  winner: "",
+  turn: "O",
+  tableData: [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""],
+  ],
+  recentCell: [-1, -1],
+};
+```
+
+<hr />
+
+- 액션 및 액션 생성자를 타이핑한다.
+
+```tsx
+export const SET_WINNER = "SET_WINNER" as const;
+
+interface SetWinnerAction {
+  type: typeof SET_WINNER;
+  winner: "O" | "X";
+}
+
+const setWinner = (winner: "O" | "X"): SetWinnerAction => {
+  return { type: SET_WINNER, winner };
+};
+```
+
+<hr />
+
+- 리듀서 타이핑을 한다.
+
+```tsx
+type ReducerActions = SetWinnerAction | ClickCellAction;
+const reducer = (
+  state: ReducerState,
+  action: ReducerActions
+): ReducerState => {};
+```
+
+## 4.2 Dispatch children
+
+- dispatch와 데이터, 이벤트를 상속받는 테이블 컴포넌트를 다음과 같이 작성한다.
+
+```tsx
+interface Props {
+  tableData: string[][];
+  dispatch: Dispatch<any>;
+  onClick: () => void;
+}
+
+const Table: FC<Props> = ({ tableData, dispatch }) => {};
+```
+
+- Dispatch 제네릭 자리에 any 대신 액션들을 넣어도 된다.
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -311,4 +380,4 @@ const Ball: VFC<Props> = ({ number, onClick }) => {};
 
 ## 듣던 강좌
 
-4-1
+4-4
