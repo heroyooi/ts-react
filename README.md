@@ -398,6 +398,77 @@ npm i react-router react-router-dom
 npm i -D @types/react-router @types/react-router-dom
 ```
 
+- 기존 react-router에서 정의해놓은 props를 확장해서 정의할 경우
+
+```tsx
+import { RouteChildrenProps } from "react-router";
+
+interface Props extends RouteChildrenProps {
+  hello: "heroyooi";
+}
+
+class GameMatcher extends Component<Props> {}
+```
+
+- RouteChildrenProps에 history, location, match가 정의되어있다.
+
+## 6-2. match와 location, history
+
+- match.params 를 사용할 때는 RouteChildrenProps에 제네릭이 마련되어 있어서 params의 값들에 대한 타입을 추론하도록 할 수 있다.
+
+- Games.tsx
+
+```tsx
+const Games = () => {
+  return (
+    <BrowserRouter>
+      <Route
+        path="/game/:name"
+        render={(props) => <GameMatcher {...props} />}
+      />
+    </BrowserRouter>
+  );
+};
+```
+
+- GameMatcher.tsx
+
+```tsx
+class GameMatcher extends Component<RouteChildrenProps<{ name: string }>> {
+  render() {
+    console.log(this.props.match.params.name);
+  }
+}
+```
+
+## 6-3. withRouter
+
+- withRouter를 감싸주면 RouteComponentProps가 강제된다.
+
+```tsx
+import { RouteComponentProps, withRouter } from "react-router-dom";
+
+class GameMatcher extends Component<RouteComponentProps<{ name: string }>> {}
+
+export default withRouter(GameMatcher);
+```
+
+## 6-4. react router hooks
+
+```tsx
+import { useRouteMatch, useLocation, useHistory } from "react-router";
+
+const GameMatcher = () => {
+  const match = useRouteMatch<{ name: string }>();
+  const location = useLocation();
+  const history = useHistory();
+
+  console.log(match.params.name);
+};
+```
+
+- 위의 예제와 동일하게 useRouteMatch에 제네릭을 넣어주면 match.params.name을 인식한다.
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -405,4 +476,4 @@ npm i -D @types/react-router @types/react-router-dom
 
 ## 듣던 강좌
 
-6-2
+7-1. 리덕스 구조 잡기
