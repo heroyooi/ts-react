@@ -431,7 +431,7 @@ const Games = () => {
 };
 ```
 
-- GameMatcher.tsx
+- GameMatcherClass.tsx
 
 ```tsx
 class GameMatcher extends Component<RouteChildrenProps<{ name: string }>> {
@@ -454,6 +454,22 @@ export default withRouter(GameMatcher);
 ```
 
 ## 6-4. react router hooks
+
+- Games.tsx
+
+```tsx
+const Games = () => {
+  return (
+    <BrowserRouter>
+      <Route path="/game/:name" render={() => <GameMatcher />} />
+    </BrowserRouter>
+  );
+};
+```
+
+- 훅스로 할 경우 props를 전달하지 않아도 된다.
+
+- GameMatcher.tsx
 
 ```tsx
 import { useRouteMatch, useLocation, useHistory } from "react-router";
