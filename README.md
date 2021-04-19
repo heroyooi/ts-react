@@ -424,7 +424,8 @@ const Games = () => {
     <BrowserRouter>
       <Route
         path="/game/:name"
-        render={(props) => <GameMatcher {...props} />}
+        render={(props) => <GameMatcher {...props} />} // 방법 1
+        component={GameMatcher} // 방법 2
       />
     </BrowserRouter>
   );
