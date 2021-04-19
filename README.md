@@ -391,6 +391,13 @@ export const TableContext = createContext<Context>({
 });
 ```
 
+## 6-1. 리액트 라우터 타이핑
+
+```command
+npm i react-router react-router-dom
+npm i -D @types/react-router @types/react-router-dom
+```
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -398,4 +405,4 @@ export const TableContext = createContext<Context>({
 
 ## 듣던 강좌
 
-5-3 useContext 타이핑
+6-2
