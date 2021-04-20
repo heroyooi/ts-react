@@ -486,11 +486,81 @@ const GameMatcher = () => {
 
 - 위의 예제와 동일하게 useRouteMatch에 제네릭을 넣어주면 match.params.name을 인식한다.
 
+## 7-1. 리덕스 구조 잡기
+
+```command
+npm i redux react-redux redux-devtools-extension
+npm i immer
+```
+
+## 7-2. action reducer 타이핑
+
+- reducers/index.ts
+
+```ts
+const reducer = combineReducers<{
+  user: UserState;
+  posts: string[];
+}>({
+  user: userReducer,
+  posts: postReducer,
+});
+
+export type RootState = ReturnType<typeof reducer>; // 함수의 리턴 타입을 가져오는 방법
+```
+
+- 리듀서 타입추론이 안되면 제네릭으로 타입추론을 해줘야한다. 잘되면 안해도 된다.
+
+- actions/user.ts
+
+```ts
+export const LOG_IN_REQUEST = "LOG_IN_REQUEST" as const;
+
+export interface LogInRequestAction {
+  type: typeof LOG_IN_REQUEST;
+  data: { id: string; password: string };
+}
+
+export const logIn = (data: { id: string; password: string }) => {};
+```
+
+- reducers/user.ts
+
+```ts
+import { LOG_IN_REQUEST, LogInRequestAction } from "./../actions/user";
+
+export interface UserState {
+  isLoggingIn: boolean;
+  data: {
+    nickname: string;
+  } | null;
+}
+
+const initialState: UserState = {
+  isLoggingIn: false,
+  data: null,
+};
+
+type UserReducerActions = LogInRequestAction | LogInSuccessAction;
+
+const userReducer = (prevState = initialState, action: UserReducerActions) => {
+  switch (action.type) {
+    case LOG_OUT:
+      return {
+        ...prevState,
+        data: null,
+      };
+    default:
+      return prevState;
+  }
+};
+
+export default userReducer;
+```
+
+## 7-6
+
 ## 참고
 
 - [TS 공식문서 | Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [TS 공식문서 | What's New](https://www.typescriptlang.org/docs/handbook/release-notes/overview.html)
-
-## 듣던 강좌
-
-7-1. 리덕스 구조 잡기
