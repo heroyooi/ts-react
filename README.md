@@ -558,7 +558,38 @@ const userReducer = (prevState = initialState, action: UserReducerActions) => {
 export default userReducer;
 ```
 
-## 7-6
+## 7-6 redux hooks 타이핑
+
+- reducers/index.ts
+
+```ts
+const reducer = combineReducers({
+  user: userReducer,
+  posts: postReducer,
+});
+
+export type RootState = ReturnType<typeof reducer>;
+
+export default reducer;
+```
+
+- ReturnType로 reducer의 리턴되는 타입을 따로 정의해준다.
+
+- App.tsx
+
+```tsx
+import { RootState } from "./reducers";
+import { UserState } from "./reducers/user";
+
+const App: FC = () => {
+  const { isLoggingIn, data } = useSelector<RootState, UserState>(
+    (state) => state.user
+  );
+};
+```
+
+- 전체 state인 TState(RootState)와 내가 꺼낸 state인 TSelected(UserState)를 제네릭으로 정의
+- useSelector 타입 정의로 가서 힌트를 얻음!
 
 ## 참고
 
